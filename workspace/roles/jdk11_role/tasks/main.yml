@@ -1,0 +1,65 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for jdk11_role_
+- name: Create Java install directory
+  file:
+    path: "{{ java_install_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download OpenJDK 11 tarball
+  get_url:
+    url: "{{ java_download_url }}"
+    dest: /tmp/OpenJDK11U-jdk.tar.gz
+    mode: '0644'
+
+- name: Extract OpenJDK tarball
+  unarchive:
+    src: /tmp/OpenJDK11U-jdk.tar.gz
+    dest: "{{ java_install_dir }}"
+    remote_src: yes
+
+- name: Find extracted folder
+  command: ls {{ java_install_dir }}
+  register: java_folders
+
+- name: Set java_home path
+  set_fact:
+    java_home: "{{ java_install_dir }}/{{ java_folders.stdout_lines | last }}"
+
+- name: Update alternatives for java
+  alternatives:
+    name: java
+    link: /usr/bin/java
+    path: "{{ java_home }}/bin/java"
+    priority: 1100
+
+- name: Update alternatives for javac
+  alternatives:
+    name: javac
+    link: /usr/bin/javac
+    path: "{{ java_home }}/bin/javac"
+    priority: 1100
+
+
+- name: Create java environment file
+  copy:
+    dest: /etc/profile.d/java.sh
+    content: |
+      export JAVA_HOME={{ java_home }}
+      export PATH=$JAVA_HOME/bin:$PATH
+    mode: '0755'
+
+- name: Reload environment variables
+  shell: source /etc/profile.d/java.sh
+  args:
+    executable: /bin/bash
+
+- name: Verify java installation
+  command: java -version
+  register: java_ver
+  changed_when: false
+
+- name: Display installed java version
+  debug:
+    var: java_ver.stderr

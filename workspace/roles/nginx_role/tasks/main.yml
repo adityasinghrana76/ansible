@@ -1,0 +1,15 @@
+
+    - name: Install Nginx
+      apt:
+        name: nginx
+        state: latest
+
+    - name: Start Nginx
+      service:
+        name: nginx
+        state: started
+
+    - name: Copy HTML file
+      copy:
+        src: /home/adityarana/ansible-aws/workspace/index.html
+        dest: /var/www/html/index.html

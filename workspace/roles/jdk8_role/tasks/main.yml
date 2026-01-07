@@ -1,0 +1,90 @@
+#SPDX-License-Identifier: MIT-0
+---
+# tasks file for jdk8_role
+
+- name: Install extraction tools
+  apt:
+    name:
+      - tar
+      - gzip
+      - bzip2
+      - xz-utils
+    state: present
+    update_cache: yes
+
+- name: Create Java install directory
+  file:
+    path: "{{ java_install_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download OpenJDK 8 tarball
+  get_url:
+    url: "{{ java_download_url }}"
+    dest: /tmp/OpenJDK8U-jdk.tar.gz
+    mode: '0644'
+    force: yes
+
+- name: Verify downloaded file type
+  command: file /tmp/OpenJDK8U-jdk.tar.gz
+  register: file_type
+  changed_when: false
+
+- debug:
+    var: file_type.stdout
+
+- name: Extract OpenJDK 8
+  unarchive:
+    src: /tmp/OpenJDK8U-jdk.tar.gz
+    dest: "{{ java_install_dir }}"
+    remote_src: yes
+    creates: "{{ java_install_dir }}/{{ java_folder_name }}"
+
+- name: Set JAVA_HOME
+  set_fact:
+    java_home: "{{ java_install_dir }}/{{ java_folder_name }}"
+
+- name: Update alternatives for java
+  alternatives:
+    name: java
+    link: /usr/bin/java
+    path: "{{ java_home }}/bin/java"
+    priority: 1100
+
+- name: Update alternatives for javac
+  alternatives:
+    name: javac
+    link: /usr/bin/javac
+    path: "{{ java_home }}/bin/javac"
+    priority: 1100
+
+- name: Set JAVA_HOME globally
+  copy:
+    dest: /etc/profile.d/java.sh
+    content: |
+      export JAVA_HOME={{ java_home }}
+      export PATH=$JAVA_HOME/bin:$PATH
+    mode: '0755'
+
+- name: Verify java installation
+  command: java -version
+  register: java_ver
+  changed_when: false
+
+- name: Display installed java version
+  debug:
+    var: java_ver.stderr
+
+- name: Force Java 8 as default
+  command: update-alternatives --set java {{ java_home }}/bin/java
+
+- name: Force Javac 8 as default
+  command: update-alternatives --set javac {{ java_home }}/bin/javac
+
+- name: Enforce JAVA_HOME
+  copy:
+    dest: /etc/profile.d/java.sh
+    content: |
+      export JAVA_HOME={{ java_home }}
+      export PATH=$JAVA_HOME/bin:/usr/bin:/bin
+    mode: '0755'

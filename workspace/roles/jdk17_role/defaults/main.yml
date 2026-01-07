@@ -1,0 +1,21 @@
+# Java version details
+java_version: "17.0.17"
+java_build: "10"
+
+# Installation directory
+java_install_dir: "/opt/java"
+
+# Extracted JDK directory
+java_dir_name: "jdk-17.0.17+10"
+
+# JAVA_HOME
+java_home: "{{ java_install_dir }}/{{ java_dir_name }}"
+
+# Download URL
+java_download_url: "https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.17%2B10/OpenJDK17U-jdk_x64_linux_hotspot_17.0.17_10.tar.gz"
+
+# Alternatives priority
+java_priority: 1700
+
+# Set Java as default
+java_set_default: true

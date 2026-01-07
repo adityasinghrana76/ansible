@@ -1,0 +1,54 @@
+#SPDX-License-Identifier: MIT-0
+
+# tasks file for jdk21_role
+
+# Tasks for jdk21_role
+
+- name: Create install directory for JDK21
+  file:
+    path: "{{ java_install_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Download OpenJDK 21 tar.gz
+  get_url:
+    url: "{{ java_download_url }}"
+    dest: /tmp/jdk21.tar.gz
+    mode: '0644'
+
+- name: Extract JDK 21
+  unarchive:
+    src: /tmp/jdk21.tar.gz
+    dest: "{{ java_install_dir }}"
+    remote_src: yes
+    creates: "{{ java_home }}"
+
+- name: Set JAVA_HOME environment script
+  copy:
+    dest: /etc/profile.d/jdk21.sh
+    content: |
+      export JAVA_HOME={{ java_home }}
+      export PATH=$JAVA_HOME/bin:$PATH
+    mode: '0755'
+
+- name: Configure update-alternatives for java
+  alternatives:
+    name: java
+    path: "{{ java_home }}/bin/java"
+    priority: "{{ java_priority }}"
+  when: java_set_default
+
+- name: Configure update-alternatives for javac
+  alternatives:
+    name: javac
+    path: "{{ java_home }}/bin/javac"
+    priority: "{{ java_priority }}"
+  when: java_set_default
+
+- name: Make JDK21 default for java
+  command: update-alternatives --set java "{{ java_home }}/bin/java"
+  when: java_set_default
+
+- name: Make JDK21 default for javac
+  command: update-alternatives --set javac "{{ java_home }}/bin/javac"
+  when: java_set_default

@@ -1,0 +1,8 @@
+#SPDX-License-Identifier: MIT-0
+---
+# defaults file for jdk8_role
+java_download_url: >-
+ https://github.com/adoptium/temurin8-binaries/releases/download/jdk8u472-b08/OpenJDK8U-jdk_x64_linux_hotspot_8u472b08.tar.gz
+
+java_install_dir: /opt/java
+java_folder_name: jdk8u472-b08
