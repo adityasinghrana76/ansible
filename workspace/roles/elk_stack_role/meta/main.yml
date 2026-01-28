@@ -1,0 +1,8 @@
+galaxy_info:
+  role_name: elk_stack
+  author: YourName
+  description: ELK stack installation and configuration
+  platforms:
+    - name: Ubuntu
+      versions:
+        - noble

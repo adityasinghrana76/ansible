@@ -1,0 +1,13 @@
+elk_version: "8.x"
+
+cluster_name: "elk-cluster"
+node_name: "elk-node-1"
+
+elastic_user: "elastic"
+elastic_password: "Elastic@123"
+
+es_heap_size: "512m"
+ls_heap_size: "512m"
+
+kibana_port: 5601
+logstash_beats_port: 5044

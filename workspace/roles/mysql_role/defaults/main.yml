@@ -1,0 +1,12 @@
+---
+# MySQL defaults
+
+mysql_root_password: "Root@123"
+
+mysql_database: "app_db"
+mysql_user: "app_user"
+mysql_user_password: "App@123"
+
+mysql_bind_address: "0.0.0.0"
+
+mysql_port: 3306

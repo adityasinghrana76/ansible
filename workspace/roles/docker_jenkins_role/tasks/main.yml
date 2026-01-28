@@ -1,0 +1,32 @@
+---
+- name: Create Jenkins volume directory on host
+  file:
+    path: "{{ jenkins_host_volume }}"
+    state: directory
+    mode: "0755"
+
+- name: Pull Jenkins image
+  shell: "docker pull {{ jenkins_image }}"
+  register: pull_result
+  changed_when: "'Downloaded newer image' in pull_result.stdout or 'Pull complete' in pull_result.stdout"
+  failed_when: pull_result.rc != 0
+
+- name: Check if Jenkins container already exists
+  shell: "docker ps -a --format '{{'{{'}}.Names{{'}}'}}' | grep -w {{ jenkins_container_name }} || true"
+  register: jenkins_exists
+  changed_when: false
+
+- name: Run Jenkins container (only if not exists)
+  shell: >
+    docker run -d
+    --name {{ jenkins_container_name }}
+    -p {{ jenkins_host_port }}:{{ jenkins_container_port }}
+    -v {{ jenkins_host_volume }}:{{ jenkins_container_volume }}
+    --restart unless-stopped
+    {{ jenkins_image }}
+  when: jenkins_exists.stdout == ""
+
+- name: Start Jenkins container if stopped
+  shell: "docker start {{ jenkins_container_name }} || true"
+  changed_when: false
+  when: jenkins_exists.stdout != ""

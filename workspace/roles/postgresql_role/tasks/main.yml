@@ -1,0 +1,52 @@
+---
+# 1️⃣ Update apt cache
+- name: Update apt cache
+  apt:
+    update_cache: yes
+  become: true
+
+# 2️⃣ Install PostgreSQL packages
+- name: Install PostgreSQL packages
+  apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - python3-psycopg2
+    state: present
+  become: true
+
+# 3️⃣ Start and enable PostgreSQL
+- name: Start and enable PostgreSQL
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+  become: true
+
+# 4️⃣ Create PostgreSQL database (PEER AUTH – CORRECT WAY)
+- name: Create PostgreSQL database
+  community.postgresql.postgresql_db:
+    name: "{{ postgres_db }}"
+    state: present
+  become: true
+  become_user: postgres
+
+# 5️⃣ Create PostgreSQL user (PEER AUTH – CORRECT WAY)
+- name: Create PostgreSQL user
+  community.postgresql.postgresql_user:
+    name: "{{ postgres_user }}"
+    password: "{{ postgres_password }}"
+    state: present
+  become: true
+  become_user: postgres
+
+# 6️⃣ Grant privileges to PostgreSQL user
+- name: Grant privileges to PostgreSQL user
+  community.postgresql.postgresql_privs:
+    database: "{{ postgres_db }}"
+    roles: "{{ postgres_user }}"
+    type: database
+    privs: ALL
+    state: present
+  become: true
+  become_user: postgres

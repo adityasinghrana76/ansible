@@ -1,0 +1,17 @@
+#SPDX-License-Identifier: MIT-0
+
+# defaults file for jenkins
+
+jenkins_version: "2.414.1"
+
+jenkins_war_url: "https://get.jenkins.io/war-stable/{{ jenkins_version }}/jenkins.war"
+
+jenkins_install_dir: "/opt/jenkins"
+jenkins_home: "/var/lib/jenkins"
+
+jenkins_user: "jenkins"
+jenkins_group: "jenkins"
+
+jenkins_port: 8080
+
+java_package: "openjdk-17-jdk"

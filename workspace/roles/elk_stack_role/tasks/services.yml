@@ -1,0 +1,17 @@
+- name: Enable & start Elasticsearch
+  systemd:
+    name: elasticsearch
+    enabled: yes
+    state: started
+
+- name: Enable & start Kibana
+  systemd:
+    name: kibana
+    enabled: yes
+    state: started
+
+- name: Enable & start Logstash
+  systemd:
+    name: logstash
+    enabled: yes
+    state: started

@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+---
+# vars file for mysql__role
+mysql_packages:
+  - mysql-server
+  - mysql-client
+  - python3-pymysql

@@ -1,0 +1,47 @@
+#SPDX-License-Identifier: MIT-0
+
+# tasks file for linuxuser_role
+#SPDX-License-Identifier: MIT-0
+
+# tasks file for linuxuser_role
+- name: Ensure doonops user exists
+  user:
+    name: "{{ doonops_user }}"
+    shell: "{{ doonops_shell }}"
+    groups: "{{ doonops_groups }}"
+    append: yes
+    create_home: yes
+    state: present
+
+- name: Create .ssh directory
+  file:
+    path: "/home/{{ doonops_user }}/.ssh"
+    state: directory
+    owner: "{{ doonops_user }}"
+    group: "{{ doonops_user }}"
+    mode: "0700"
+
+- name: Add SSH public key
+  authorized_key:
+    user: "{{ doonops_user }}"
+    key: "{{ ssh_public_key }}"
+    state: present
+
+- name: Disable password authentication
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PasswordAuthentication'
+    line: 'PasswordAuthentication no'
+    state: present
+
+- name: Ensure public key authentication enabled
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: '^PubkeyAuthentication'
+    line: 'PubkeyAuthentication yes'
+    state: present
+
+- name: Restart SSH service
+  service:
+    name: ssh
+    state: restarted

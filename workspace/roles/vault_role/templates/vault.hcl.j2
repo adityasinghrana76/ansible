@@ -1,0 +1,19 @@
+ui = true
+
+listener "tcp" {
+  address     = "{{ vault_addr }}:{{ vault_port }}"
+  {% if vault_tls_disable %}
+  tls_disable = 1
+  {% else %}
+  tls_disable = 0
+  {% endif %}
+}
+
+storage "{{ vault_storage_type }}" {
+  path = "{{ vault_data_dir }}"
+}
+
+api_addr     = "http://{{ vault_addr }}:{{ vault_port }}"
+cluster_addr = "http://{{ vault_addr }}:8201"
+
+disable_mlock = true

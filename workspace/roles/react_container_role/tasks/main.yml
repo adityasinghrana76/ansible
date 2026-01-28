@@ -1,0 +1,35 @@
+---
+- name: Create deploy directory on server
+  file:
+    path: "{{ react_deploy_path }}"
+    state: directory
+    mode: "0755"
+
+- name: Copy React app code to server
+  copy:
+    src: "react-form-app/"
+    dest: "{{ react_deploy_path }}/"
+    mode: "0755"
+
+- name: Stop old React container if exists
+  shell: "docker rm -f {{ react_container_name }} || true"
+  changed_when: false
+
+- name: Remove old React image if exists
+  shell: "docker rmi -f {{ react_image_name }} || true"
+  changed_when: false
+
+- name: Build React Docker image
+  shell: "docker build -t {{ react_image_name }} {{ react_deploy_path }}"
+  register: build_result
+  failed_when: build_result.rc != 0
+
+- name: Run React container
+  shell: >
+    docker run -d
+    --name {{ react_container_name }}
+    -p {{ react_app_port }}:80
+    --restart unless-stopped
+    {{ react_image_name }}
+  register: run_result
+  failed_when: run_result.rc != 0

@@ -1,0 +1,105 @@
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - unzip
+      - curl
+      - wget
+    state: present
+    update_cache: yes
+
+- name: Create vault group
+  ansible.builtin.group:
+    name: "{{ vault_group }}"
+    state: present
+
+- name: Create vault user
+  ansible.builtin.user:
+    name: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    system: true
+    home: "{{ vault_config_dir }}"
+    shell: /bin/false
+    create_home: false
+    state: present
+
+- name: Create Vault directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0750"
+  loop:
+    - "{{ vault_config_dir }}"
+    - "{{ vault_data_dir }}"
+
+- name: Download Vault zip
+  ansible.builtin.get_url:
+    url: "{{ vault_zip_url }}"
+    dest: "/tmp/vault_{{ vault_version }}_linux_amd64.zip"
+    mode: "0644"
+
+- name: Unzip Vault binary
+  ansible.builtin.unarchive:
+    src: "/tmp/vault_{{ vault_version }}_linux_amd64.zip"
+    dest: "/tmp/"
+    remote_src: true
+
+- name: Move Vault binary to install directory
+  ansible.builtin.copy:
+    src: "/tmp/vault"
+    dest: "{{ vault_install_dir }}/vault"
+    mode: "0755"
+    remote_src: true
+
+- name: Ensure Vault binary ownership is root
+  ansible.builtin.file:
+    path: "{{ vault_install_dir }}/vault"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+
+- name: Create vault configuration file
+  ansible.builtin.template:
+    src: vault.hcl.j2
+    dest: "{{ vault_config_dir }}/vault.hcl"
+    owner: "{{ vault_user }}"
+    group: "{{ vault_group }}"
+    mode: "0640"
+  notify: restart vault
+
+- name: Create vault systemd service file
+  ansible.builtin.template:
+    src: vault.service.j2
+    dest: /etc/systemd/system/vault.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: restart vault
+
+- name: Enable and start Vault service
+  ansible.builtin.systemd:
+    name: vault
+    enabled: true
+    state: started
+    daemon_reload: true
+
+# OPTIONAL: Enable UFW + open port 8200
+- name: Install UFW (optional)
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+    update_cache: yes
+  when: vault_enable_ufw
+
+- name: Allow Vault port in UFW (optional)
+  ansible.builtin.ufw:
+    rule: allow
+    port: "{{ vault_port }}"
+    proto: tcp
+  when: vault_enable_ufw
+
+- name: Enable UFW (optional)
+  ansible.builtin.ufw:
+    state: enabled
+  when: vault_enable_ufw

@@ -1,0 +1,10 @@
+- name: Install Kibana
+  apt:
+    name: kibana
+    state: present
+
+- name: Configure kibana.yml
+  template:
+    src: kibana.yml.j2
+    dest: /etc/kibana/kibana.yml
+  notify: restart kibana

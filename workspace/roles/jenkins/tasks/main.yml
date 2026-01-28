@@ -1,0 +1,56 @@
+#SPDX-License-Identifier: MIT-0
+
+# tasks file for jenkins
+---
+- name: Install Java
+  apt:
+    name: "{{ java_package }}"
+    state: present
+    update_cache: yes
+
+- name: Create Jenkins group
+  group:
+    name: "{{ jenkins_group }}"
+    state: present
+
+- name: Create Jenkins user
+  user:
+    name: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
+    home: "{{ jenkins_home }}"
+    shell: /bin/bash
+    create_home: yes
+
+- name: Create Jenkins directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
+    mode: '0755'
+  loop:
+    - "{{ jenkins_install_dir }}"
+    - "{{ jenkins_home }}"
+
+- name: Download Jenkins WAR
+  get_url:
+    url: "{{ jenkins_war_url }}"
+    dest: "{{ jenkins_install_dir }}/jenkins.war"
+    owner: "{{ jenkins_user }}"
+    group: "{{ jenkins_group }}"
+    mode: '0644'
+
+- name: Create systemd service file
+  template:
+    src: jenkins.service.j2
+    dest: /etc/systemd/system/jenkins.service
+  notify: restart jenkins
+
+- name: Reload systemd
+  command: systemctl daemon-reload
+
+- name: Enable and start Jenkins
+  service:
+    name: jenkins
+    state: started
+    enabled: yes

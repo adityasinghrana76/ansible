@@ -1,0 +1,7 @@
+#SPDX-License-Identifier: MIT-0
+
+# defaults file for linuxuser_role
+doonops_user: doonops
+doonops_groups: sudo
+doonops_shell: /bin/bash
+ssh_public_key: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCvnSitb3kqn3kej7Ld56NGY3zwpC3JReJAJ+b0gTHYRNIzzcelKqg6AWE8z3LWBkjL5fy+2tuAdVG951c1D35V1Gejw0wonxjCqhKswWlzYQdaUkXKCi94CokKVbwl9UqgSLq6XM/NJRJvZWQSavRitkWZCsb6Uyz3EEa9MFUZHJn785/mFjp1ZQDEB2gwW2MHPlV1eU2Z1R7c7XrJtc/HOqYTd2TKTvOLj4lq6LU03mY6nR7pPGwiDTd+JdAqw2Ge9kQZTQ/9uZtFXZMUEXcN89nlShBwSUyQePAn8zs9EsD8v0DFAQavJ7vwo9h8ipzKiu+HoAYcsa75iuWTAWz9"

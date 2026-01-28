@@ -1,0 +1,9 @@
+---
+jenkins_container_name: jenkins
+jenkins_image: jenkins/jenkins:lts
+
+jenkins_host_port: 8080
+jenkins_container_port: 8080
+
+jenkins_host_volume: /opt/jenkins_home
+jenkins_container_volume: /var/jenkins_home

@@ -1,0 +1,20 @@
+- name: Install dependencies
+  apt:
+    name:
+      - apt-transport-https
+      - curl
+      - gnupg
+    state: present
+    update_cache: yes
+
+- name: Add Elastic GPG key
+  shell: |
+    curl -fsSL https://artifacts.elastic.co/GPG-KEY-elasticsearch \
+    | gpg --dearmor -o /usr/share/keyrings/elastic-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/elastic-keyring.gpg
+
+- name: Add Elastic repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/elastic-keyring.gpg] {{ elastic_repo }} stable main"
+    state: present

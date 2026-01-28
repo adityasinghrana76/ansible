@@ -1,0 +1,86 @@
+- name: Install required packages for Nexus (no Java)
+  apt:
+    name:
+      - wget
+      - tar
+      - unzip
+    state: present
+    update_cache: yes
+
+- name: Create nexus user
+  user:
+    name: "{{ nexus_user }}"
+    shell: /bin/bash
+    create_home: yes
+
+- name: Download Nexus tar.gz
+  get_url:
+    url: "{{ nexus_download_url }}"
+    dest: "/opt/nexus-{{ nexus_version }}-unix.tar.gz"
+    mode: "0644"
+
+- name: Extract Nexus tar.gz in /opt
+  unarchive:
+    src: "/opt/nexus-{{ nexus_version }}-unix.tar.gz"
+    dest: "/opt"
+    remote_src: yes
+  args:
+    creates: "/opt/nexus-{{ nexus_version }}"
+
+- name: Rename extracted Nexus folder to /opt/nexus
+  command: mv /opt/nexus-{{ nexus_version }} "{{ nexus_install_dir }}"
+  args:
+    creates: "{{ nexus_install_dir }}"
+
+- name: Ensure nexus data directory exists
+  file:
+    path: "{{ nexus_data_dir }}"
+    state: directory
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+    mode: "0755"
+
+- name: Set ownership for Nexus install directory
+  file:
+    path: "{{ nexus_install_dir }}"
+    state: directory
+    recurse: yes
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+
+- name: Set ownership for Nexus data directory
+  file:
+    path: "{{ nexus_data_dir }}"
+    state: directory
+    recurse: yes
+    owner: "{{ nexus_user }}"
+    group: "{{ nexus_group }}"
+
+- name: Configure Nexus to run as nexus user
+  lineinfile:
+    path: "{{ nexus_install_dir }}/bin/nexus.rc"
+    regexp: '^run_as_user='
+    line: 'run_as_user="{{ nexus_user }}"'
+    create: yes
+
+- name: Configure Nexus port
+  lineinfile:
+    path: "{{ nexus_install_dir }}/etc/nexus-default.properties"
+    regexp: '^application-port='
+    line: "application-port={{ nexus_port }}"
+  notify: Restart Nexus
+
+- name: Create systemd service file for Nexus
+  template:
+    src: nexus.service.j2
+    dest: /etc/systemd/system/nexus.service
+    mode: "0644"
+  notify:
+    - Reload systemd
+    - Restart Nexus
+
+- name: Enable and start Nexus service
+  systemd:
+    name: nexus
+    enabled: yes
+    state: started

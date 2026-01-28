@@ -1,0 +1,17 @@
+- name: Install Logstash
+  apt:
+    name: logstash
+    state: present
+
+- name: Configure Logstash heap
+  lineinfile:
+    path: /etc/logstash/jvm.options
+    regexp: "^-Xms"
+    line: "-Xms{{ ls_heap_size }}"
+  notify: restart logstash
+
+- name: Configure Logstash pipeline
+  template:
+    src: nginx.conf.j2
+    dest: /etc/logstash/conf.d/nginx.conf
+  notify: restart logstash

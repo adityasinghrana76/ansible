@@ -1,0 +1,17 @@
+[Unit]
+Description=Jenkins
+After=network.target
+
+[Service]
+User={{ jenkins_user }}
+Group={{ jenkins_group }}
+WorkingDirectory={{ jenkins_install_dir }}
+ExecStart=/usr/bin/java -jar {{ jenkins_install_dir }}/jenkins.war \
+  --httpPort={{ jenkins_port }} \
+  --prefix=/
+
+Restart=always
+Environment="JENKINS_HOME={{ jenkins_home }}"
+
+[Install]
+WantedBy=multi-user.target

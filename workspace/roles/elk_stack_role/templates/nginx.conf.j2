@@ -1,0 +1,22 @@
+input {
+  beats {
+    port => {{ logstash_beats_port }}
+  }
+}
+
+filter {
+  grok {
+    match => { "message" => "%{COMBINEDAPACHELOG}" }
+  }
+}
+
+output {
+  elasticsearch {
+    hosts => ["https://127.0.0.1:9200"]
+    user => "{{ elastic_user }}"
+    password => "{{ elastic_password }}"
+    ssl => true
+    ssl_certificate_verification => false
+    index => "nginx-logs-%{+YYYY.MM.dd}"
+  }
+}

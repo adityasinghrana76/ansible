@@ -1,0 +1,10 @@
+#SPDX-License-Identifier: MIT-0
+
+# defaults file for react_app
+
+react_app_port: 3000
+
+react_container_name: react-form-container
+react_image_name: react-form-image
+
+react_deploy_path: /opt/react-form-app
