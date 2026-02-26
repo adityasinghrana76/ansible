@@ -2,5 +2,5 @@
   hosts: all
   become: yes
   roles:
-    - docker_role
+    - "{{ role_name }}"
     
