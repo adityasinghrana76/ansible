@@ -1,0 +1,21 @@
+---
+- name: Install Docker
+  apt:
+    name: docker.io
+    state: present
+    update_cache: yes
+
+- name: Start and enable Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Pull Docker image from Docker Hub
+  docker_container:
+    name: tech-portfolio
+    image: adityasinghrana76/tech-portfolio:latest
+    state: started
+    restart_policy: always
+    ports:
+      - "80:80"
